@@ -1,3 +1,3 @@
 package cz.cvut.fit.kot.rihafili.turingDsl.exceptions
 
-class NoAvailableTransitionException : Throwable()
+class InvalidTransitionEnd( mes: String ) : Exception(mes)
