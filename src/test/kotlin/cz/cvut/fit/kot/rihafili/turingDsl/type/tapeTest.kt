@@ -53,7 +53,7 @@ class BlankSymbolTest : StringSpec ({
         val tape = Tape()
 
         for ( i in -5 .. 5 )
-            tape.get( i ) shouldBe BLANK_SYMBOL
+            tape.get( i ) shouldBe SYMBOL_CONST.BLANK
     }
 })
 
@@ -61,7 +61,20 @@ class KeepSymbolTest : StringSpec ({
     "Keep symbol should keep the curent symbol"{
         Tape().apply {
             set('a')
-            set(KEEP_SYMBOL)
+            set(SYMBOL_CONST.KEEP)
         }.get() shouldBe 'a'
+    }
+})
+
+class CopyTapeTest : StringSpec ({
+    "Copying tape should not interfere with original tape"{
+        val original = Tape()
+        original.set('x')
+
+        val copy = original.copy()
+        copy.get() shouldBe 'x'
+
+        copy.set('y')
+        original.get() shouldBe 'x'
     }
 })

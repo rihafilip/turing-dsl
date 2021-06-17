@@ -1,11 +1,20 @@
 package cz.cvut.fit.kot.rihafili.turingDsl.type
 
-class Tape (initialCapacity: Int = 20){
-    private val data = ArrayDeque<Char>(
-        BLANK_SYMBOL.toString().repeat( initialCapacity ).toList()
-    )
+import kotlin.collections.ArrayDeque
 
-    private var index : Int = initialCapacity / 2;
+// Primary constructor is private, it is used only by clone
+class Tape private constructor(
+    private val data: ArrayDeque<Char>,
+    private var index: Int
+){
+
+    // Public constructor of blank tape with stated capacity
+    constructor(initialCapacity: Int = 20) : this(
+        ArrayDeque(
+            SYMBOL_CONST.BLANK.toString().repeat(initialCapacity).toList()
+        ),
+        initialCapacity / 2
+    )
 
     fun move ( offset: Int ){
         check ( offset )
@@ -19,7 +28,7 @@ class Tape (initialCapacity: Int = 20){
 
     fun set( input: Char, offset: Int = 0 ) {
         check ( offset )
-        if ( input != KEEP_SYMBOL )
+        if ( input != SYMBOL_CONST.KEEP )
             data[index + offset] = input
     }
 
@@ -29,14 +38,15 @@ class Tape (initialCapacity: Int = 20){
         // diff is negative, hence the minus operations
         if ( diff < 0 ) {
             for ( i in 0 until -diff )
-                data.addFirst( BLANK_SYMBOL )
-            index -= diff // offset index from begining
+                data.addFirst( SYMBOL_CONST.BLANK )
+            index -= diff // offset index from beginning
         }
         // append
         else if ( diff > data.size ){
             for ( i in 0 until diff )
-               data.addLast( BLANK_SYMBOL )
+               data.addLast( SYMBOL_CONST.BLANK )
         }
-
     }
+
+    fun copy() : Tape = Tape( ArrayDeque(data), index )
 }
