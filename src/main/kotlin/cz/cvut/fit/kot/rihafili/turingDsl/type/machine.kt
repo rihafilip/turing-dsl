@@ -15,12 +15,16 @@ enum class MachineEnd {
  */
 class TuringMachine(
     private val tape: Tape, // workingTape
-    val initialState: String,
+    private val initialState: String,
     private val stopOnFirst: Boolean = false,
     private val states: MutableSet<String> = mutableSetOf(), // Set of all possible states
     private val machines: MutableMap<String, TuringMachine> = mutableMapOf(),
     val transFun: TransitionFunction = TransitionFunction() // Transition function
 ) {
+    init {
+        addState( initialState )
+        addState( END_STATE )
+    }
 
     // Adds state to states pool
     fun addState( state: String ) = states.add(state)

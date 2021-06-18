@@ -41,6 +41,7 @@ class TransitionFunction ( private val data: MutableMap< TransitionStart, Mutabl
                 when( end ){
                     is NextState -> output.add( end.symbol )
                     is PrintTransition -> output.add( end.symbol )
+                    else -> Unit
                 }
             }
         }
