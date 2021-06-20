@@ -4,14 +4,15 @@ import cz.cvut.fit.kot.rihafili.turingDsl.exceptions.TuringCompilationError
 import cz.cvut.fit.kot.rihafili.turingDsl.type.*
 
 // Intro function into TuringDSL
-fun buildTuring ( block: TuringBuilder.() -> Unit ) : TuringMachineWrapper? =
+fun buildTuring ( block: TuringBuilder.() -> Unit ) : TuringMachineWrapper? {
     try {
-//        compileTuring( TuringBuilder().apply(block) ) // TODO
-        null
-    } catch ( e: TuringCompilationError ) {
-        // TODO print
-        null
+        val builder = TuringBuilder().apply(block)
+        return TuringCompiler(builder).compile()
+    } catch (e: TuringCompilationError) {
+        println("Compile error:\n\t[${e.name}]: ${e.message}")
+        return null
     }
+}
 
 
 // Basic builder of all turing machines

@@ -16,7 +16,7 @@ enum class MachineEnd {
 class TuringMachine(
     private val tape: Tape, // workingTape
     private val initialState: String,
-    private val stopOnFirst: Boolean = false,
+    var stopOnFirst: Boolean = false,
     private val states: MutableSet<String> = mutableSetOf(), // Set of all possible states
     private val machines: MutableMap<String, TuringMachine> = mutableMapOf(),
     val transFun: TransitionFunction = TransitionFunction() // Transition function
