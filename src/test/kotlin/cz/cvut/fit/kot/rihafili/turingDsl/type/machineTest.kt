@@ -8,7 +8,6 @@ fun makeMachine(): TuringMachine {
     val submachine = TuringMachine(
         tape,
         "A",
-        false,
         mutableSetOf("A")
     )
 
@@ -20,7 +19,6 @@ fun makeMachine(): TuringMachine {
     return TuringMachine(
         tape,
         "Init",
-        false,
         mutableSetOf("Init", "A", "B"),
         mutableMapOf("Submachine" to submachine)
     )
@@ -49,7 +47,7 @@ class IncorrectTransitionTest : StringSpec({
 
 class HaltedMachineTest : StringSpec({
     "Machine with no transitions should be halted"{
-        makeMachine().run() shouldBe MachineEnd.HALT
+        makeMachine().run(false) shouldBe MachineEnd.HALT
     }
 })
 
@@ -77,6 +75,6 @@ class EndedMachineTest : StringSpec({
             NextState(END_STATE, SYMBOL_CONST.BLANK, 0)
         ) shouldBe true
 
-        machine.run() shouldBe MachineEnd.END
+        machine.run(false) shouldBe MachineEnd.END
     }
 })

@@ -19,7 +19,7 @@ fun main() {
         }
 
         machine ( "add" ) {
-            states( "initial" )
+            states( "initial", "a")
             initialState = "initial"
 
             tr( "a", 'c' ) goto tr( 0, END_STATE, 'x' )

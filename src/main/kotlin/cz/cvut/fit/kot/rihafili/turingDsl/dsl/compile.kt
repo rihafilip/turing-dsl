@@ -50,7 +50,6 @@ class TuringCompiler( private val builder: TuringBuilder ){
         return TuringMachine(
             builder.commonTape,
             initial,
-            false, // Placeholder
             machineBuilder.states
         ) to machineBuilder
     }
