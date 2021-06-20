@@ -3,18 +3,20 @@ package cz.cvut.fit.kot.rihafili.turingDsl.dsl
 import cz.cvut.fit.kot.rihafili.turingDsl.type.MachineEnd
 import cz.cvut.fit.kot.rihafili.turingDsl.type.TuringMachine
 
-sealed class Output
+sealed class TuringMachineOutput
 
-data class StringOutput ( val message: String ) : Output()
+data class StringOutput ( val message: String ) : TuringMachineOutput()
 
-data class TapeOutput ( val index: Int, val lenght: Int ) : Output()
+data class TapeOutput ( val offset: Int, val lenght: Int, val printBlank: Boolean ) : TuringMachineOutput()
 
-class TuringMachineWrapper ( private val machine: TuringMachine ){
-    val printOnEnd = mutableListOf<Output>()
-    val printOnHalt = mutableListOf<Output>()
+// TODO pretty print the whole construct
+class TuringMachineWrapper {
+    var machine: TuringMachine? = null
+    val printOnEnd = mutableListOf<TuringMachineOutput>()
+    val printOnHalt = mutableListOf<TuringMachineOutput>()
 
     fun run( noHalt: Boolean = false ) {
-        val ret = machine.run()
+        val ret = machine?.run()
 
         when( ret ){
             MachineEnd.HALT -> for ( i in printOnEnd ) printOutput( i )
@@ -22,13 +24,12 @@ class TuringMachineWrapper ( private val machine: TuringMachine ){
         }
     }
 
-    private fun printOutput ( data: Output ): Unit = when( data ){
+    private fun printOutput ( data: TuringMachineOutput ): Unit = when( data ){
         is StringOutput -> print( data.message )
-//        is TapeOutput -> {
-//            val endIndex = data.index + data.length
-//            for ( i in data.index until endIndex )
-//                val char = machine
-//        }
-        else -> Unit
+        is TapeOutput -> {
+//            val endIndex = data.offset + data.lenght
+//            for ( i in data.offset until endIndex )
+//                val
+        }
     }
 }

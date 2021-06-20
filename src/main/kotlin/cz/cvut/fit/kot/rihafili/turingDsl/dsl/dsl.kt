@@ -1,73 +1,92 @@
 package cz.cvut.fit.kot.rihafili.turingDsl.dsl
 
+import cz.cvut.fit.kot.rihafili.turingDsl.exceptions.TuringCompilationError
 import cz.cvut.fit.kot.rihafili.turingDsl.type.*
 
-fun buildTuring ( block: TuringBuilder.() -> Unit ) : TuringMachineWrapper {
-    val builder = TuringBuilder()
-    builder.block()
+// Intro function into TuringDSL
+fun buildTuring ( block: TuringBuilder.() -> Unit ) : TuringMachineWrapper? =
+    try {
+//        compileTuring( TuringBuilder().apply(block) ) // TODO
+        null
+    } catch ( e: TuringCompilationError ) {
+        // TODO print
+        null
+    }
 
-}
 
+// Basic builder of all turing machines
 class TuringBuilder {
     // Common tape used by all the machines
-    val commonTape = Tape()
+    internal val commonTape = Tape()
+    internal val printOnEnd = mutableListOf<TuringMachineOutput>()
+    internal val printOnHalt = mutableListOf<TuringMachineOutput>()
+    internal val allMachines = mutableMapOf<String, MachineBuilder>()
+    internal var mainMachine : MachineBuilder? = null
 
+    // Construct the main Turing machine
     fun mainMachine ( block: MachineBuilder.() -> Unit) {
-        TODO()
+        mainMachine = MachineBuilder().apply( block )
     }
 
-    fun machine ( name: String, block: MachineBuilder.() -> Unit ) {
-        TODO()
-    }
+    // Construct additional Turing machine
+    fun machine ( name: String, block: MachineBuilder.() -> Unit ) =
+        allMachines.put( name, MachineBuilder().apply( block ) )
 
-    fun input ( block: InputBuilder.() -> Unit ) {
-        TODO()
-    }
+    fun input ( block: InputBuilder.() -> Unit ) = InputBuilder(commonTape).block()
 
-    fun printOutput ( showBlank: Boolean = false, block: PrintBuilder.() -> Unit ){
+    fun printOutput ( printBlank: Boolean = false, block: PrintBuilder.() -> Unit ) =
+        PrintBuilder( printOnEnd, printBlank ).block()
 
-    }
-
-    fun printOnHalt ( showBlank: Boolean = false, block: PrintBuilder.() -> Unit ){
-
-    }
+    fun printOnHalt ( printBlank: Boolean = false, block: PrintBuilder.() -> Unit ) =
+        PrintBuilder( printOnHalt, printBlank ).block()
 }
 
-// Container that collects information about turing machine
-class MachineBuilder ( val name: String, tape: Tape ) {
-    val states = mutableSetOf<String>()
-    val transitions = mutableListOf<Pair<TransitionStart, TransitionEnd>>()
-    val calledMachines = mutableSetOf<String>()
+// Container that collects information about one Turing machine
+class MachineBuilder {
+    internal val states = mutableSetOf<String>()
+    internal val transitions = mutableListOf<Pair<TransitionStart, TransitionEnd>>()
+    internal val calledMachines = mutableSetOf<String>()
     var initialState: String? = null
 
+    // Adds states to turing machine
     fun states ( vararg args: String ) {
         states.addAll(args)
     }
 
+    // Creates an input to transition function
     fun tr( state: String, symbol: Char ) = TransitionStart( state, symbol )
 
+    // Creates an output to transition function
     fun tr( position: Int, state: String, symbol: Char ) = NextState( state, symbol, position )
 
+    // Pairs a transition input to transition output
     infix fun TransitionStart.goto ( end: NextState ) = transitions.add( this to end )
 
-    infix fun TransitionStart.printGoto ( end: NextState ) = transitions.add( this to PrintTransition( end.state, end.symbol, end.pos )  )
+    // Pairs a transition input to transition output with printing the current symbol
+    infix fun TransitionStart.printGoto ( end: NextState ) = transitions.add( this to end.toPrintTransition() )
 
+    // Calls another turing machine
     infix fun TransitionStart.call ( end: String ) {
         calledMachines.add( end )
         transitions.add( this to NextMachine( end ) )
     }
 }
 
-class InputBuilder {
-    infix fun Int.set ( other: String ){
-        TODO()
+// Add initial state to tape used by Turing machines
+class InputBuilder ( private val tape: Tape ){
+    // Set a string starting on an offset of this from starting position
+    infix fun Int.set ( other: String ) {
+        var i = this
+        for ( ch in other )
+            tape.set(ch, i++)
     }
 }
 
-class PrintBuilder {
-    val outputs = mutableListOf<Output>()
+// Add a message to be printed at the end of Turing machine cycle
+class PrintBuilder ( private val context: MutableList<TuringMachineOutput>, private val printBlank: Boolean ) {
+    // Print a state of tape on offsets of this and in length of other
+    infix fun Int.lenght ( other: Int ) = context.add( TapeOutput(this, other, printBlank ) )
 
-    infix fun Int.lenght ( other: Int ) = outputs.add( TapeOutput(this, other ) )
-
-    fun message ( message: String ) = outputs.add( StringOutput( message ) )
+    // Print a static message
+    fun message ( message: String ) = context.add( StringOutput( message ) )
 }
