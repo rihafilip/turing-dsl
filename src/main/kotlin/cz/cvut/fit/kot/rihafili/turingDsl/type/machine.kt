@@ -1,7 +1,6 @@
 package cz.cvut.fit.kot.rihafili.turingDsl.type
 
 import cz.cvut.fit.kot.rihafili.turingDsl.exceptions.InvalidTransitionEnd
-import javax.crypto.Mac
 
 enum class MachineEnd {
     HALT, END
@@ -18,7 +17,7 @@ class TuringMachine(
     private val initialState: String,
     private val states: MutableSet<String> = mutableSetOf(), // Set of all possible states
     private val machines: MutableMap<String, TuringMachine> = mutableMapOf(),
-    val transFun: TransitionFunction = TransitionFunction() // Transition function
+    private val transFun: TransitionFunction = TransitionFunction() // Transition function
 ) {
     init {
         states.add( initialState )
@@ -43,62 +42,56 @@ class TuringMachine(
     }
 
     // Stop on first signalizes if machine ends on first found "end" or it continues
-    fun run(stopOnFirst: Boolean ) = process( initialState, stopOnFirst)
+    fun start(stopOnFirst: Boolean, tape: Tape ) : Pair<MachineEnd, Tape> {
+        val runtime = TuringMachineRuntime( tape.copy(), stopOnFirst )
+        return runtime.start( this )
+    }
 
-    private fun process ( state: String, stopOnFirst: Boolean ) : MachineEnd {
-        if ( state == END_STATE )
-            return MachineEnd.END
+    // Currently returns only last transition return, TODO to return all
+    inner class TuringMachineRuntime ( private val tape: Tape, private val stopOnFirst: Boolean ) {
+        fun start ( machine: TuringMachine ) = process( machine, machine.initialState )
 
-        val nextList = transFun( TransitionStart( state, tape.get() ) )
+        private fun process( machine: TuringMachine, state: String ) : Pair<MachineEnd, Tape> {
+            if ( state == END_STATE )
+                return MachineEnd.END to tape
 
-        if ( nextList.size == 1 && nextList[0] == Halt )
-            return MachineEnd.HALT
+            val nextList = machine.transFun( TransitionStart(state, tape.get()) )
 
-        var returnFromProcess = MachineEnd.HALT;
+            var ret : Pair<MachineEnd, Tape>?
 
-        for ( (index, next) in nextList.withIndex() ) {
-            val forked =
-                if ( index == nextList.lastIndex ) this // Last nextTransition is not forked
-                else fork()
+            for ( (index, next) in nextList.withIndex() ){
+                val forked =
+                    if ( index == nextList.lastIndex ) this // Last nextTransition is not forked
+                    else TuringMachineRuntime( tape.copy(), stopOnFirst )
 
-            val ret = when( next ){
-                Halt -> throw InvalidTransitionEnd( "Halt should not be among other state transition ends" )
-                is NextMachine -> {
-                    val innerReturn = forked.machines[next.name]?.run(false)
-                        ?: throw InvalidTransitionEnd("Machine with name ${next.name} not found within TuringMachine context")
-
-                    // If called machine halted, current machine is also halted
-                    // else current (
-                    when( innerReturn ){
-                        MachineEnd.HALT -> MachineEnd.HALT
-                        MachineEnd.END -> forked.process(state, stopOnFirst)
+                ret = when ( next ){
+                    Halt -> return MachineEnd.HALT to tape
+                    is NextMachine -> {
+                        val nextMachine = machine.machines[ next.name ]
+                            ?: throw InvalidTransitionEnd ("Machine with name ${next.name} not found within TuringMachine context")
+                        forked.start( nextMachine )
+                    }
+                    is NextState -> forked.transition( machine, next )
+                    is PrintTransition ->{
+                        print( tape.get() )
+                        forked.transition( machine, next.toNextState() )
                     }
                 }
-                is NextState -> forked.moveToNextState(next, stopOnFirst)
-                is PrintTransition -> {
-                    print(forked.tape.get())
-                    forked.moveToNextState( next.toNextState(), stopOnFirst)
+
+                if ( ( stopOnFirst && ret.first == MachineEnd.END )
+                    || index == nextList.lastIndex
+                ){
+                    return ret
                 }
             }
 
-            if ( stopOnFirst && ret == MachineEnd.END )
-                return MachineEnd.END
-            else
-                returnFromProcess = ret
+            return MachineEnd.HALT to tape
         }
 
-        return returnFromProcess
-    }
-
-    private fun moveToNextState( transition: NextState, stopOnFirst: Boolean ) : MachineEnd {
-        tape.set( transition.symbol )
-        tape.move( transition.pos )
-        return process( transition.state, stopOnFirst )
-    }
-
-    private fun fork( tapeArg: Tape? = null ) : TuringMachine {
-        val nextTape = tapeArg ?: tape.copy()
-        val nextMachines = machines.mapValues { it.value.fork(nextTape) }.toMutableMap()
-        return TuringMachine(nextTape, initialState, states.toMutableSet(), nextMachines, transFun)
+        private fun transition ( machine: TuringMachine, transition: NextState ) : Pair<MachineEnd, Tape> {
+            tape.set( transition.symbol )
+            tape.move( transition.pos )
+            return process( machine, transition.state )
+        }
     }
 }

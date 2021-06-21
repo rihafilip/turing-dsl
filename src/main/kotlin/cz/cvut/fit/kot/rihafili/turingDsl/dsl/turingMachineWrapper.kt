@@ -2,6 +2,8 @@ package cz.cvut.fit.kot.rihafili.turingDsl.dsl
 
 import cz.cvut.fit.kot.rihafili.turingDsl.exceptions.InvalidTransitionEnd
 import cz.cvut.fit.kot.rihafili.turingDsl.type.MachineEnd
+import cz.cvut.fit.kot.rihafili.turingDsl.type.SYMBOL_CONST
+import cz.cvut.fit.kot.rihafili.turingDsl.type.Tape
 import cz.cvut.fit.kot.rihafili.turingDsl.type.TuringMachine
 
 sealed class TuringMachineOutput
@@ -13,32 +15,37 @@ data class TapeOutput ( val offset: Int, val lenght: Int, val printBlank: Boolea
 // TODO pretty print the whole construct
 class TuringMachineWrapper(
     private val mainMachine: TuringMachine,
+    private val tape: Tape,
     private val allMachines: Map<String, TuringMachine>,
     private val printOnEnd: List<TuringMachineOutput>,
     private val printOnHalt: List<TuringMachineOutput>
 ) {
 
-    fun run( noHalt: Boolean = false ) {
+    fun start( stopOnFirst: Boolean = false ) {
         val ret = try{
-          mainMachine.run()
+          mainMachine.start(stopOnFirst, tape)
         } catch ( e: InvalidTransitionEnd){
             println( "Error while running machine: ${e.message}" )
             return
         }
 
-        when( ret ){
-            MachineEnd.HALT -> for ( i in printOnEnd ) printOutput( i )
-            MachineEnd.END -> for ( i in printOnHalt ) printOutput( i )
+        when( ret.first ){
+            MachineEnd.HALT -> for ( i in printOnEnd ) printOutput( i, ret.second )
+            MachineEnd.END -> for ( i in printOnHalt ) printOutput( i, ret.second )
         }
     }
 
-    private fun printOutput ( data: TuringMachineOutput ): Unit = when( data ){
+    private fun printOutput ( data: TuringMachineOutput, printTape: Tape ): Unit = when( data ){
         is StringOutput -> print( data.message )
         is TapeOutput -> {
-//            TODO
-//            val endIndex = data.offset + data.lenght
-//            for ( i in data.offset until endIndex )
-//                val
+            val endIndex = data.offset + data.lenght
+            for ( i in data.offset until endIndex ){
+                val ch = printTape.get(i)
+                if ( data.printBlank && ch == SYMBOL_CONST.BLANK )
+                    print( ' ' )
+                else print(ch)
+            }
+
         }
     }
 }

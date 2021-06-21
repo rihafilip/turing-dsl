@@ -31,6 +31,7 @@ class TuringCompiler( private val builder: TuringBuilder ){
 
         return TuringMachineWrapper(
             mainMachine.first,
+            builder.commonTape,
             nonNullMap.mapValues { (_, data) -> data.first },
             printOnEnd = builder.printOnEnd,
             printOnHalt = builder.printOnHalt
