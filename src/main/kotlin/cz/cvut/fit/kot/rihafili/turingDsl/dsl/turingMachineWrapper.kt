@@ -42,8 +42,10 @@ class TuringMachineWrapper(
             val endIndex = data.offset + data.lenght
             for ( i in data.offset until endIndex ){
                 val ch = printTape.get(i)
-                if ( data.printBlank && ch == SYMBOL_CONST.BLANK )
-                    print( ' ' )
+                if ( ch == SYMBOL_CONST.BLANK ) {
+                    if ( data.printBlank )
+                        print( ' ' )
+                }
                 else print(ch)
             }
 
