@@ -42,7 +42,7 @@ class Tape private constructor(
             index -= diff // offset index from beginning
         }
         // append
-        else if ( diff > data.size ){
+        else if ( diff >= data.size ){
             for ( i in 0 until diff )
                data.addLast( SYMBOL_CONST.BLANK )
         }
