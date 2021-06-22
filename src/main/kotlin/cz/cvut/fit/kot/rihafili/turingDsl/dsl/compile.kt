@@ -49,7 +49,6 @@ class TuringCompiler( private val builder: TuringBuilder ){
             ?: throw TuringCompilationError(name, "Machine misses initial state")
 
         return TuringMachine(
-            builder.commonTape,
             initial,
             machineBuilder.states
         ) to machineBuilder

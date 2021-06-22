@@ -13,7 +13,6 @@ enum class MachineEnd {
  * Working alphabet and input symbols are not explicitly set, but all Chars are used instead
  */
 class TuringMachine(
-    private val tape: Tape, // workingTape
     private val initialState: String,
     private val states: MutableSet<String> = mutableSetOf(), // Set of all possible states
     private val machines: MutableMap<String, TuringMachine> = mutableMapOf(),
