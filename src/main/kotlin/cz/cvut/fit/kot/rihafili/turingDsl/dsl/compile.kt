@@ -6,24 +6,33 @@ import cz.cvut.fit.kot.rihafili.turingDsl.type.*
 // Extended machine with its builder
 typealias ExtMachine = Pair<TuringMachine, MachineBuilder>
 
-class TuringCompiler( private val builder: TuringBuilder ){
-    // Map of all machines, null is placeholder
-    private val machinesMap = mutableMapOf<String, ExtMachine?>()
-
+/**
+ * Compiler of TuringBuilder
+ * throws TuringCompilationError on structural error
+ */
+object TuringCompiler {
     // Compiles builder to TuringMachineBuilder
-    fun compile() : TuringMachineWrapper {
+    fun compile( builder: TuringBuilder ) : TuringMachineWrapper {
+        // Map of all machines, null is placeholder
+        val machinesMap = mutableMapOf<String, ExtMachine?>()
+
+        // Create main machine
         val mainMachine : ExtMachine = createMachine(
             "Main",
             builder.mainMachine
-                ?: throw TuringCompilationError("Main", "Missing main machine")
+                ?: throw TuringCompilationError("Main", "Missing main machine"),
+            machinesMap
         )
 
+        // Create all other machines
         for ( (name, machineBuilder) in builder.allMachines ){
-            machinesMap[name] = createMachine( name, machineBuilder )
+            machinesMap[name] = createMachine( name, machineBuilder, machinesMap )
         }
 
-        val nonNullMap = assertMap()
+        // Map without null TuringMachines
+        val nonNullMap = assertMap( machinesMap )
 
+        // Adds the rest of data to all machines
         finalize( "Main", mainMachine, nonNullMap )
         for ( (name, machineBuilder) in nonNullMap ) {
             finalize(name, machineBuilder, nonNullMap)
@@ -38,20 +47,18 @@ class TuringCompiler( private val builder: TuringBuilder ){
         )
     }
 
-    private fun createMachine( name: String, machineBuilder: MachineBuilder ) : ExtMachine {
+    // Creates machine from input machineBuilder
+    private fun createMachine( name: String, machineBuilder: MachineBuilder, map: MutableMap<String, ExtMachine?> ) : ExtMachine {
         for ( calledName in machineBuilder.calledMachines ) {
             // place dummy null in map to signalize that this machines implementation is expected
-            if (calledName !in machinesMap)
-                machinesMap[calledName] = null
+            if (calledName !in map)
+                map[calledName] = null
         }
 
         val initial = machineBuilder.initialState
             ?: throw TuringCompilationError(name, "Machine misses initial state")
 
-        return TuringMachine(
-            initial,
-            machineBuilder.states
-        ) to machineBuilder
+        return TuringMachine( initial, machineBuilder.states) to machineBuilder
     }
 
     private fun finalize ( name: String, extMachine: ExtMachine, map: Map<String, ExtMachine>) {
@@ -91,8 +98,8 @@ class TuringCompiler( private val builder: TuringBuilder ){
     }
 
     // ensures all called machines will have implementation
-    private fun assertMap() : Map<String, ExtMachine> =
-        machinesMap.mapValues { (name, machine) ->
+    private fun assertMap( map: Map<String, ExtMachine?> ) : Map<String, ExtMachine> =
+        map.mapValues { (name, machine) ->
             machine ?: throw TuringCompilationError( name, "Machine is called, but not implemented" )
         }
 }

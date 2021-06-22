@@ -7,7 +7,7 @@ import cz.cvut.fit.kot.rihafili.turingDsl.type.*
 fun buildTuring ( block: TuringBuilder.() -> Unit ) : TuringMachineWrapper? {
     try {
         val builder = TuringBuilder().apply(block)
-        return TuringCompiler(builder).compile()
+        return TuringCompiler.compile( builder )
     } catch (e: TuringCompilationError) {
         println("Compile error:\n\t[${e.name}]: ${e.message}")
         return null
