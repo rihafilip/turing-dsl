@@ -21,17 +21,17 @@ class TuringMachineWrapper(
     private val printOnHalt: List<TuringMachineOutput>
 ) {
 
-    fun start( stopOnFirst: Boolean = false ) {
+    fun start( stopOnFirst: Boolean = false, debug: Boolean = false) {
         val ret = try{
-          mainMachine.start(stopOnFirst, tape)
+          mainMachine.start(stopOnFirst, tape, debug)
         } catch ( e: InvalidTransitionEnd){
             println( "Error while running machine: ${e.message}" )
             return
         }
 
         when( ret.first ){
-            MachineEnd.HALT -> for ( i in printOnEnd ) printOutput( i, ret.second )
-            MachineEnd.END -> for ( i in printOnHalt ) printOutput( i, ret.second )
+            MachineEnd.HALT -> for ( i in printOnHalt ) printOutput( i, ret.second )
+            MachineEnd.END -> for ( i in printOnEnd ) printOutput( i, ret.second )
         }
     }
 

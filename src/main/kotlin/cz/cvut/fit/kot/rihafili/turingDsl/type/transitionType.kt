@@ -19,4 +19,8 @@ data class PrintTransition ( val state: String, val symbol: Char, val pos: Int )
 data class NextMachine ( val name: String ) : TransitionEnd()
 
 // Class signalising halting of turing machine
-object Halt : TransitionEnd()
+object Halt : TransitionEnd() {
+    override fun toString(): String {
+        return "Halt"
+    }
+}

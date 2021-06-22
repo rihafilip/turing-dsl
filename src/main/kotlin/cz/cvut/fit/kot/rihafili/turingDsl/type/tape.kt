@@ -49,4 +49,34 @@ class Tape private constructor(
     }
 
     fun copy() : Tape = Tape( ArrayDeque(data), index )
+
+    override fun toString(): String {
+        var flag = false
+        val builder = StringBuilder()
+
+        for ( i in data.indices ) {
+            if ( i == index || data[i] != SYMBOL_CONST.BLANK ){
+                if ( !flag ){
+                    flag = true
+                    builder.append( '[' )
+                        .append( i - index )
+                        .append ( "] " )
+                }
+
+                if ( i == index )
+                    builder.append('>')
+
+                builder.append( data[i] )
+
+                if ( i == index )
+                    builder.append('<')
+
+            } else if ( flag ){
+                flag = false
+                builder.append( '\n' )
+            }
+        }
+
+        return builder.toString()
+    }
 }
