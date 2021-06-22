@@ -2,7 +2,10 @@ package cz.cvut.fit.kot.rihafili.turingDsl.type
 
 import kotlin.collections.ArrayDeque
 
-// Primary constructor is private, it is used only by clone
+/**
+ * Simulation opf endless tape
+ * Primary constructor is private, it is used only by clone
+ */
 class Tape private constructor(
     private val data: ArrayDeque<Char>,
     private var index: Int
@@ -16,22 +19,26 @@ class Tape private constructor(
         initialCapacity / 2
     )
 
+    // Move around head of the tape
     fun move ( offset: Int ){
         check ( offset )
         index += offset
     }
 
+    // Get character around current head
     fun get( offset: Int = 0 ) : Char {
         check ( offset )
         return data[index + offset]
     }
 
+    // Set a character around the tape
     fun set( input: Char, offset: Int = 0 ) {
         check ( offset )
         if ( input != SYMBOL_CONST.KEEP )
             data[index + offset] = input
     }
 
+    // Checks if offset is within current size of tape and resizes it if it is not
     private fun check ( offset: Int ) {
         val diff = index + offset
         // prepend

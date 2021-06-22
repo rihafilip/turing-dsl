@@ -7,13 +7,14 @@ import cz.cvut.fit.kot.rihafili.turingDsl.type.SYMBOL_CONST
 import cz.cvut.fit.kot.rihafili.turingDsl.type.Tape
 import cz.cvut.fit.kot.rihafili.turingDsl.type.TuringMachine
 
+// Classes used for printing output
 sealed class TuringMachineOutput
-
 data class StringOutput ( val message: String ) : TuringMachineOutput()
-
 data class TapeOutput ( val offset: Int, val lenght: Int, val printBlank: Boolean ) : TuringMachineOutput()
 
-// TODO pretty print the whole construct
+/**
+ * Wrapper for processing and printing from Turing machine
+ */
 class TuringMachineWrapper(
     private val mainMachine: TuringMachine,
     private val tape: Tape,
@@ -21,7 +22,7 @@ class TuringMachineWrapper(
     private val printOnEnd: List<TuringMachineOutput>,
     private val printOnHalt: List<TuringMachineOutput>
 ) {
-
+    // Start execution of Turing Machine
     fun start( debug: Boolean = false) {
         val (state, tape) = try{
           mainMachine.start(tape, debug)
@@ -39,6 +40,7 @@ class TuringMachineWrapper(
             printOutput( i, tape )
     }
 
+    // Print final output
     private fun printOutput ( data: TuringMachineOutput, printTape: Tape ): Unit = when( data ){
         is StringOutput -> print( data.message )
         is TapeOutput -> {
@@ -46,6 +48,8 @@ class TuringMachineWrapper(
 
             for ( i in data.offset until endIndex ) {
                 val ch = printTape.get(i)
+                // Blank is printed if printBlank is true
+                // otherwise it is omitted
                 if ( ch == SYMBOL_CONST.BLANK ) {
                     if ( data.printBlank )
                         print( ' ' )
@@ -56,6 +60,7 @@ class TuringMachineWrapper(
         }
     }
 
+    // Pretty print this wrapper
     fun print() = apply { print("$this\n") }
 
     override fun toString() = buildString {

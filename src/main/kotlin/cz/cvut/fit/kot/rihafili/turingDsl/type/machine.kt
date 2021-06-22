@@ -25,6 +25,7 @@ class TuringMachine(
         states.add( END_STATE )
     }
 
+    // Registers another machine to be called
     fun addMachine ( name: String, machine: TuringMachine ) = machines.put( name, machine )
 
     // Adds transition to transitions function
@@ -42,7 +43,7 @@ class TuringMachine(
         return transFun.set(start, end)
     }
 
-    // Stop on first signalizes if machine ends on first found "end" or it continues
+    // Starts the execution of this machine on the input tape
     fun start(tape: Tape, debug: Boolean ) : Pair<MachineEnd, Tape> {
         val runtime = TuringMachineRuntime( tape.copy(), debug )
         return runtime.start( this )
@@ -71,8 +72,10 @@ class TuringMachine(
 
     // Runtime wrapper around TuringMachine
     private inner class TuringMachineRuntime ( private val tape: Tape, private val debug: Boolean ) {
+        // Start running of this wrapper
         fun start ( machine: TuringMachine ) = process( machine, machine.initialState, "Main" )
 
+        // Processing of one transition
         private fun process( machine: TuringMachine, state: String, name: String ) : Pair<MachineEnd, Tape> {
             if ( state == END_STATE )
                 return MachineEnd.END to tape

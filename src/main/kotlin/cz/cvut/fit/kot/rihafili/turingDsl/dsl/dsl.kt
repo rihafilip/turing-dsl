@@ -3,6 +3,12 @@ package cz.cvut.fit.kot.rihafili.turingDsl.dsl
 import cz.cvut.fit.kot.rihafili.turingDsl.exceptions.TuringCompilationError
 import cz.cvut.fit.kot.rihafili.turingDsl.type.*
 
+/**
+ * Builder construct for DSL
+ * All builders work only as containers and need to be then compiled with TuringCompiler
+ * This is automatically done with 'buildTuring' wrapper
+ */
+
 // Intro function into TuringDSL
 fun buildTuring ( block: TuringBuilder.() -> Unit ) : TuringMachineWrapper? {
     try {

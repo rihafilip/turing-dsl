@@ -6,7 +6,7 @@ import cz.cvut.fit.kot.rihafili.turingDsl.misc.joinToSet
  * Non-deterministic turing machine
  */
 class TransitionFunction ( private val data: MutableMap< TransitionStart, MutableList<TransitionEnd> > = mutableMapOf() ){
-    // Input symbols used by this function
+    // Input symbols to this function
     val inputSymbols : Set<Char>
     get() = data.map { ( start, _ ) -> start.symbol }.toSet()
 
@@ -30,8 +30,10 @@ class TransitionFunction ( private val data: MutableMap< TransitionStart, Mutabl
         return output
     }
 
+    // Get transition end to this function or halt if none are available
     operator fun invoke( start: TransitionStart ) : List<TransitionEnd> = data[start] ?: listOf(Halt)
 
+    // Adds transition end for Transition start
     operator fun set ( index: TransitionStart, value: TransitionEnd ) : Boolean =
         if (index.state == END_STATE || value is Halt )
             false
