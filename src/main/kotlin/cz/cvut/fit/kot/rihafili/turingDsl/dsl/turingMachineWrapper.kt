@@ -22,9 +22,9 @@ class TuringMachineWrapper(
     private val printOnHalt: List<TuringMachineOutput>
 ) {
 
-    fun start( stopOnFirst: Boolean = false, debug: Boolean = false) {
+    fun start( debug: Boolean = false) {
         val ret = try{
-          mainMachine.start(stopOnFirst, tape, debug)
+          mainMachine.start(tape, debug)
         } catch ( e: InvalidTransitionEnd){
             println( "Error while running machine: ${e.message}" )
             return

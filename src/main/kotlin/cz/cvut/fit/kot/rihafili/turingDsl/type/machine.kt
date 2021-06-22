@@ -43,8 +43,8 @@ class TuringMachine(
     }
 
     // Stop on first signalizes if machine ends on first found "end" or it continues
-    fun start(stopOnFirst: Boolean, tape: Tape, debug: Boolean ) : Pair<MachineEnd, Tape> {
-        val runtime = TuringMachineRuntime( tape.copy(), stopOnFirst, debug )
+    fun start(tape: Tape, debug: Boolean ) : Pair<MachineEnd, Tape> {
+        val runtime = TuringMachineRuntime( tape.copy(), debug )
         return runtime.start( this )
     }
 
@@ -69,9 +69,8 @@ class TuringMachine(
         append( transFun.toString().offset() )
     }
 
-
-    // Currently returns only last transition return, TODO to return all
-    inner class TuringMachineRuntime ( private val tape: Tape, private val stopOnFirst: Boolean, private val debug: Boolean ) {
+    // Runtime wrapper around TuringMachine
+    private inner class TuringMachineRuntime ( private val tape: Tape, private val debug: Boolean ) {
         fun start ( machine: TuringMachine ) = process( machine, machine.initialState, "Main" )
 
         private fun process( machine: TuringMachine, state: String, name: String ) : Pair<MachineEnd, Tape> {
@@ -89,7 +88,7 @@ class TuringMachine(
             for ( (index, next) in nextList.withIndex() ){
                 val forked =
                     if ( index == nextList.lastIndex ) this // Last nextTransition is not forked
-                    else TuringMachineRuntime( tape.copy(), stopOnFirst, debug )
+                    else TuringMachineRuntime( tape.copy(), debug )
 
                 ret = when ( next ){
                     Halt -> return MachineEnd.HALT to tape
@@ -109,7 +108,7 @@ class TuringMachine(
                     }
                 }
 
-                if ( ( stopOnFirst && ret.first == MachineEnd.END )
+                if ( ret.first == MachineEnd.END
                     || index == nextList.lastIndex
                 ){
                     return ret
