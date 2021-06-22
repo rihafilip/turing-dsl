@@ -83,40 +83,58 @@ class TuringMachine(
                 println( tape )
             }
 
-            var ret : Pair<MachineEnd, Tape>?
-
             for ( (index, next) in nextList.withIndex() ){
-                val forked =
-                    if ( index == nextList.lastIndex ) this // Last nextTransition is not forked
-                    else TuringMachineRuntime( tape.copy(), debug )
+                val isLastIndex = index == nextList.lastIndex
+                val ret = processTransition(
+                    next,
+                    machine,
+                    state,
+                    name,
+                    isLastIndex
+                )
 
-                ret = when ( next ){
-                    Halt -> return MachineEnd.HALT to tape
-                    is NextMachine -> {
-                        val nextMachine = machine.machines[ next.name ]
-                            ?: throw InvalidTransitionEnd ("Machine with name ${next.name} not found within TuringMachine context")
-                        val semiRet = forked.process( nextMachine, nextMachine.initialState, next.name )
-                        when( semiRet.first ){
-                            MachineEnd.HALT -> semiRet
-                            MachineEnd.END -> process( machine, state, name )
-                        }
-                    }
-                    is NextState -> forked.transition( machine, next, name )
-                    is PrintTransition ->{
-                        print( tape.get() )
-                        forked.transition( machine, next.toNextState(), name )
-                    }
-                }
-
-                if ( ret.first == MachineEnd.END
-                    || index == nextList.lastIndex
-                ){
+                // Returns first
+                if ( ret.first == MachineEnd.END || isLastIndex )
                     return ret
-                }
             }
 
             return MachineEnd.HALT to tape
         }
+
+        private fun processTransition ( next: TransitionEnd, machine: TuringMachine, state: String, name: String, isLastIndex: Boolean ) : Pair<MachineEnd, Tape> {
+            val forked =
+                    if ( isLastIndex ) this // Last nextTransition is not forked
+                    else TuringMachineRuntime( tape.copy(), debug )
+
+            return when ( next ){
+                    // Halt halts
+                    Halt -> MachineEnd.HALT to tape
+                    // Call next machine
+                    is NextMachine -> forked.callMachine(next.name, machine, state, name)
+                    // Transition to next state
+                    is NextState -> forked.transition( machine, next, name )
+                    is PrintTransition -> {
+                        print( tape.get() )
+                        forked.transition( machine, next.toNextState(), name )
+                    }
+                }
+        }
+
+        private fun callMachine ( nextMachineName: String, machine: TuringMachine, state: String, name: String ) : Pair<MachineEnd, Tape> {
+            val nextMachine = machine.machines[ nextMachineName ]
+                ?: throw InvalidTransitionEnd ("Machine with name $nextMachineName not found within TuringMachine context")
+
+            // Return from called machine
+            val semiRet = process( nextMachine, nextMachine.initialState, nextMachineName )
+
+            // If called machine halted, also halt
+            // else continue on current tape and current state
+            if ( semiRet.first == MachineEnd.HALT )
+                return semiRet
+            else
+                return process( machine, state, name )
+        }
+
 
         private fun transition ( machine: TuringMachine, transition: NextState, name: String ) : Pair<MachineEnd, Tape> {
             tape.set( transition.symbol )
