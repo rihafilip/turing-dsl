@@ -1,6 +1,8 @@
 package cz.cvut.fit.kot.rihafili.turingDsl.type
 
 import cz.cvut.fit.kot.rihafili.turingDsl.exceptions.InvalidTransitionEnd
+import cz.cvut.fit.kot.rihafili.turingDsl.misc.joinToSet
+import cz.cvut.fit.kot.rihafili.turingDsl.misc.offset
 
 enum class MachineEnd {
     HALT, END
@@ -46,6 +48,28 @@ class TuringMachine(
         return runtime.start( this )
     }
 
+    override fun toString() = buildString {
+        append( "states Q: ")
+        append( states.joinToSet() )
+        append('\n')
+
+        append( "input symbols ∑: " )
+        append( transFun.inputSymbols.joinToSet() )
+        append( '\n' )
+
+        append( "tape alphabet G: " )
+        append( transFun.workingAlphabet.joinToSet() )
+        append( '\n' )
+
+        append( "initial state q: $initialState \n" )
+        append( "blank symbol: ${SYMBOL_CONST.BLANK}\n"  )
+        append( "end states F: { $END_STATE }\n")
+
+        append( "transition function δ: (Q\\F) x G -> Q x G x N\n" )
+        append( transFun.toString().offset() )
+    }
+
+
     // Currently returns only last transition return, TODO to return all
     inner class TuringMachineRuntime ( private val tape: Tape, private val stopOnFirst: Boolean, private val debug: Boolean ) {
         fun start ( machine: TuringMachine ) = process( machine, machine.initialState, "Main" )
@@ -56,7 +80,7 @@ class TuringMachine(
 
             val nextList = machine.transFun( TransitionStart(state, tape.get()) )
             if ( debug ){
-                println( "[$name] ($state, ${tape.get()}) -> $nextList" )
+                println( "[$name] ($state, ${tape.get()}) -> ${nextList.joinToSet()}" )
                 println( tape )
             }
 
@@ -101,4 +125,6 @@ class TuringMachine(
             return process( machine, transition.state, name )
         }
     }
+
+
 }

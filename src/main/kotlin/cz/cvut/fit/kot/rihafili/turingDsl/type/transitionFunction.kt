@@ -1,5 +1,7 @@
 package cz.cvut.fit.kot.rihafili.turingDsl.type
 
+import cz.cvut.fit.kot.rihafili.turingDsl.misc.joinToSet
+
 /**
  * Non-deterministic turing machine
  */
@@ -40,5 +42,15 @@ class TransitionFunction ( private val data: MutableMap< TransitionStart, Mutabl
             data[index] = mutableListOf(value)
             true
         }
+
+    override fun toString() = buildString {
+        for ( (start, end) in data ){
+            append(start)
+            append( " -> " )
+            append( end.joinToSet() )
+            append( '\n' )
+        }
+    }
+
 
 }

@@ -1,6 +1,7 @@
 package cz.cvut.fit.kot.rihafili.turingDsl.dsl
 
 import cz.cvut.fit.kot.rihafili.turingDsl.exceptions.InvalidTransitionEnd
+import cz.cvut.fit.kot.rihafili.turingDsl.misc.offset
 import cz.cvut.fit.kot.rihafili.turingDsl.type.MachineEnd
 import cz.cvut.fit.kot.rihafili.turingDsl.type.SYMBOL_CONST
 import cz.cvut.fit.kot.rihafili.turingDsl.type.Tape
@@ -48,4 +49,23 @@ class TuringMachineWrapper(
 
         }
     }
+
+    fun print() = apply { print("$this\n") }
+
+    override fun toString() = buildString {
+        append( "[Main machine]\n" )
+        append( mainMachine.toString().offset() )
+        append( '\n' )
+
+        for ( (name, machine) in allMachines ) {
+            append( "[$name]\n" )
+            append( machine.toString().offset() )
+            append( '\n' )
+        }
+
+        append( "Initial tape state:\n" )
+        append( tape.toString().offset() )
+    }
+
+
 }
