@@ -68,7 +68,7 @@ class WorkingAlphabetTest : StringSpec({
         for ( end in ends )
             func.set(start, end) shouldBe true
 
-        func.workingAlphabet shouldContainExactly listOf(SYMBOL_CONST.BLANK, 'a', 'b', 'c')
+        func.tapeAlphabet shouldContainExactly listOf(SYMBOL_CONST.BLANK, 'a', 'b', 'c')
     }
 })
 

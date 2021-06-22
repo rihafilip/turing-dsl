@@ -48,35 +48,34 @@ class Tape private constructor(
         }
     }
 
+    // Creates a deep copy of this tape
     fun copy() : Tape = Tape( ArrayDeque(data), index )
 
-    override fun toString(): String {
+    override fun toString() = buildString {
         var flag = false
-        val builder = StringBuilder()
 
         for ( i in data.indices ) {
-            if ( i == index || data[i] != SYMBOL_CONST.BLANK ){
+            val current = i == index
+            if ( current || data[i] != SYMBOL_CONST.BLANK ) {
                 if ( !flag ){
                     flag = true
-                    builder.append( '[' )
-                        .append( i - index )
-                        .append ( "] " )
+                    append( '[' )
+                    append( i - index )
+                    append ( "] " )
                 }
 
-                if ( i == index )
-                    builder.append('>')
+                if ( current )
+                    append('>')
 
-                builder.append( data[i] )
+                append( data[i] )
 
-                if ( i == index )
-                    builder.append('<')
+                if ( current )
+                    append('<')
 
             } else if ( flag ){
                 flag = false
-                builder.append( '\n' )
+                append( '\n' )
             }
         }
-
-        return builder.toString()
     }
 }

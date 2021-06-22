@@ -58,7 +58,7 @@ class TuringMachine(
         append( '\n' )
 
         append( "tape alphabet G: " )
-        append( transFun.workingAlphabet.joinToSet() )
+        append( transFun.tapeAlphabet.joinToSet() )
         append( '\n' )
 
         append( "initial state q: $initialState \n" )

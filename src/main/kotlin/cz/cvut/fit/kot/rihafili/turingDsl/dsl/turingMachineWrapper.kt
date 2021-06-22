@@ -23,24 +23,28 @@ class TuringMachineWrapper(
 ) {
 
     fun start( debug: Boolean = false) {
-        val ret = try{
+        val (state, tape) = try{
           mainMachine.start(tape, debug)
-        } catch ( e: InvalidTransitionEnd){
+        } catch ( e: InvalidTransitionEnd ){
             println( "Error while running machine: ${e.message}" )
             return
         }
 
-        when( ret.first ){
-            MachineEnd.HALT -> for ( i in printOnHalt ) printOutput( i, ret.second )
-            MachineEnd.END -> for ( i in printOnEnd ) printOutput( i, ret.second )
+        val list = when( state ){
+            MachineEnd.HALT -> printOnHalt
+            MachineEnd.END -> printOnEnd
         }
+
+        for ( i in list )
+            printOutput( i, tape )
     }
 
     private fun printOutput ( data: TuringMachineOutput, printTape: Tape ): Unit = when( data ){
         is StringOutput -> print( data.message )
         is TapeOutput -> {
             val endIndex = data.offset + data.lenght
-            for ( i in data.offset until endIndex ){
+
+            for ( i in data.offset until endIndex ) {
                 val ch = printTape.get(i)
                 if ( ch == SYMBOL_CONST.BLANK ) {
                     if ( data.printBlank )
