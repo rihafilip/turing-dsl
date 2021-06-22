@@ -3,7 +3,7 @@ DSL for creating TuringMachines in Kotlin
 
 ## Turing machine
 Turing machine is a mathematical construct that can describe an abstract machine working with states over an infinite tape.
-More can be found on [Wikipedia](https://en.wikipedia.org/wiki/Turing_machine)
+More can be found on [Wikipedia](https://en.wikipedia.org/wiki/Turing_machine).
 
 ## Difference of this DSL from formal definition
 Main difference from formal definition is the ability to call other Turing machines in form similar to calling function. 
@@ -102,6 +102,8 @@ Operator `lenght` prints the tape on an index from end OFFSET and reads for LENG
 Function `message` sets a static message to be printed.
 
 ### Compilation
-Upon exiting the builder lambdas, `buildTuring` "compiles" the machine. If it has syntax error, it prints that error and returns null, 
-otherwise it returns TuringMachineWrapper. You can call `print` over this wrapper to pretty print the output, or `start` to start executing 
+Upon exiting the builder lambda, `buildTuring` "compiles" the machine. If it has syntax error, it prints that error and returns null, 
+otherwise it returns TuringMachineWrapper.
+
+You can call `print` over this wrapper to pretty print the output, or `start` to start the execution of 
 the machine. `start` also has one parameter `debug: Boolean` which if set to true prints "debug" information about transitions.

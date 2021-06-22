@@ -84,6 +84,7 @@ class TuringMachine(
             if ( debug ){
                 println( "[$name] ($state, ${tape.get()}) -> ${nextList.joinToSet()}" )
                 println( tape )
+                println()
             }
 
             for ( (index, next) in nextList.withIndex() ){
