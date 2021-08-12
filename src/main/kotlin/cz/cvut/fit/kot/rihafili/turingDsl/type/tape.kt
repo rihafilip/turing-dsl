@@ -3,7 +3,7 @@ package cz.cvut.fit.kot.rihafili.turingDsl.type
 import kotlin.collections.ArrayDeque
 
 /**
- * Simulation opf endless tape
+ * Simulation of endless tape
  * Primary constructor is private, it is used only by clone
  */
 class Tape private constructor(
